@@ -1,0 +1,296 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+/// <reference path=".././js/babylon.3.0.d.ts"/>
+var O4D;
+(function (O4D) {
+    var SceneUtils = (function () {
+        function SceneUtils() {
+        }
+        SceneUtils.prototype.SetSceneBackground = function (backgroundColor, scene) {
+            scene.clearColor = new BABYLON.Color3(1, 0, 0);
+        };
+        SceneUtils.prototype.GetCurrentBKColor = function () {
+            return '#556789';
+        };
+        return SceneUtils;
+    }());
+    O4D.SceneUtils = SceneUtils;
+})(O4D || (O4D = {}));
+/// <reference path=".././js/babylon.3.0.d.ts"/>
+var O4D;
+(function (O4D) {
+    var InputController = (function () {
+        function InputController() {
+        }
+        InputController.prototype.AddInputListener = function () {
+            var _this = this;
+            window.addEventListener('keydown', function (event) {
+                _this.InputController(event);
+            }, false);
+        };
+        InputController.prototype.InputController = function (evt) {
+        };
+        return InputController;
+    }());
+    O4D.InputController = InputController;
+})(O4D || (O4D = {}));
+/// <reference path=".././js/babylon.3.0.d.ts"/>
+var O4D;
+(function (O4D) {
+    var LoadOrthoModel = (function () {
+        function LoadOrthoModel() {
+        }
+        LoadOrthoModel.prototype.LoadObject = function (scene) {
+            BABYLON.SceneLoader.ImportMesh("", "./assets/", "main.babylon", scene, function (meshes) {
+                var cil = meshes[0];
+                console.log("++++++++++ Mesh imported: " + cil.name + " , pos: " + cil.position + " , Visible: " + cil.isVisible);
+                var materialObject = new BABYLON.StandardMaterial("textura", scene);
+                var x = scene.getMeshByName("newGumX");
+                x.material = materialObject;
+                materialObject.diffuseTexture = new BABYLON.Texture("./assets/gumT.jpg", scene);
+                var matAligner = new BABYLON.StandardMaterial("alignerMaterial", scene);
+                matAligner.diffuseColor = new BABYLON.Color3(0.000, 0.749, 1.000);
+                matAligner.alpha = 0.7;
+                meshes.forEach(function (element) {
+                    if (element.name.substr(0, 7) == "aligner") {
+                        element.material = matAligner;
+                        console.log("Applying texture to aligner");
+                    }
+                });
+            });
+        };
+        LoadOrthoModel.prototype.ApplyTextures = function (theScene, theMeshArray) {
+            var matAligner = new BABYLON.StandardMaterial("alignerMaterial", theScene);
+            matAligner.diffuseColor = new BABYLON.Color3(0.000, 0.749, 1.000);
+            theMeshArray.forEach(function (element) {
+                element.material = matAligner;
+            });
+        };
+        return LoadOrthoModel;
+    }());
+    O4D.LoadOrthoModel = LoadOrthoModel;
+})(O4D || (O4D = {}));
+/// <reference path="./elementproperties.ts"/>
+/// <reference path=".././js/babylon.3.0.d.ts"/>
+/// <reference path=".././js/babylon.gui.d.ts"/>
+var O4D;
+(function (O4D) {
+    var OrthoUI = (function () {
+        function OrthoUI() {
+        }
+        OrthoUI.prototype.InitUI = function () {
+            this._gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+        };
+        OrthoUI.prototype.BuildUI = function () {
+            this.AddButtons();
+        };
+        OrthoUI.prototype.AddButtons = function () {
+            var button = BABYLON.GUI.Button.CreateSimpleButton("but", "Add Aligners");
+            button.width = 0.1;
+            button.height = "40px";
+            button.color = "white";
+            button.background = "green";
+            button.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+            this._gui.addControl(button);
+            button.onPointerDownObservable.add(function () {
+                console.log("Clicking!");
+            });
+        };
+        return OrthoUI;
+    }());
+    O4D.OrthoUI = OrthoUI;
+})(O4D || (O4D = {}));
+/// <reference path=".././js/babylon.3.0.d.ts"/>
+var O4D;
+(function (O4D) {
+    var TadController = (function () {
+        function TadController() {
+        }
+        TadController.prototype.GetTadObject = function () {
+        };
+        TadController.prototype.SetTadProperties = function () {
+        };
+        return TadController;
+    }());
+    O4D.TadController = TadController;
+})(O4D || (O4D = {}));
+/// <reference path=".././js/babylon.3.0.d.ts"/>
+/// <reference path=".././js/babylon.gui.d.ts"/>
+/// <reference path="./sceneutils.ts"/>
+/// <reference path="./inputcontroller.ts"/>
+/// <reference path="./loadmodels.ts"/>
+/// <reference path="./orthoui.ts"/>
+/// <reference path="./tadcontroller.ts"/>
+var Game = (function (_super) {
+    __extends(Game, _super);
+    function Game(canvasElement) {
+        var _this = 
+        // Create canvas and engine
+        _super.call(this) || this;
+        _this._infoOn = false;
+        _this._spinOn = false;
+        _this._canvas = document.getElementById(canvasElement);
+        _this._engine = new BABYLON.Engine(_this._canvas, true);
+        return _this;
+    }
+    Game.prototype.createScene = function () {
+        console.log("Start create scene");
+        // create a basic BJS Scene object
+        this._scene = new BABYLON.Scene(this._engine);
+        this._camera = new BABYLON.ArcRotateCamera('camera1', 0, 0, 0, BABYLON.Vector3.Zero(), this._scene);
+        this._camera.setPosition(new BABYLON.Vector3(0.07359291881658388, -0.04753404168065539, -0.261010704453408));
+        // target the camera to scene origin            
+        this._camera.setTarget(new BABYLON.Vector3(0, 0, 0));
+        // attach the camera to the canvas
+        this._camera.attachControl(this._canvas, false);
+        this._camera.fov = 0.434587;
+        this._camera.minZ = 0.01;
+        this._camera.maxZ = 1000;
+        // create a basic light, aiming 0,1,0 - meaning, to the sky
+        this._light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(1, 0, 0), this._scene);
+        var ux = new O4D.SceneUtils();
+        console.log("Data: " + ux.GetCurrentBKColor());
+        BABYLON.DebugLayer.InspectorURL = './js/babylon.inspector.bundle.js';
+        //this._scene.debugLayer.show();            
+        this._observer = this._scene.onNewMeshAddedObservable.add(function () {
+            console.log("Observando when a mess is added");
+        });
+    };
+    Game.prototype.renderPipeline = function () {
+        var defaultPipeline = new BABYLON.DefaultRenderingPipeline("default", true, this._scene, [this._camera]);
+        defaultPipeline.bloomEnabled = false;
+        defaultPipeline.fxaaEnabled = true;
+        defaultPipeline.bloomWeight = 0.5;
+    };
+    Game.prototype.animate = function () {
+        var _this = this;
+        // run the render loop
+        this._engine.runRenderLoop(function () {
+            if (_this._spinOn) {
+                if (_this._rootObject != null) {
+                    _this._rootObject.rotation.y += 0.05;
+                }
+            }
+            _this._scene.render();
+        });
+        // the canvas/window resize event handler
+        window.addEventListener('resize', function () {
+            _this._engine.resize();
+        });
+    };
+    Game.prototype.setBK = function () {
+        this._scene.clearColor = new BABYLON.Color4(0.098, 0.098, 0.439, 1);
+    };
+    Game.prototype.InputListener = function () {
+        this.AddInputListener();
+    };
+    Game.prototype.InputController = function (evt) {
+        if (evt.keyCode == 87) {
+            console.log("Key W pressed...");
+            var t1 = this._scene.getMeshByName("TAD_01");
+            var t2 = this._scene.getMeshByName('TAD_01 (1)');
+            var puntos = [];
+            // for (let i = 1; i <= 8; i++) { 
+            //     var bracketFrom = scene.getMeshByName("anchor1" + i);          
+            //     newPoint = bracketFrom.getAbsolutePosition();
+            //     newPoint = new BABYLON.Vector3(newPoint.x,newPoint.y - 0.001,newPoint.z + 0.02);        
+            //     puntos.push(newPoint); 
+            // }
+            // var tube = BABYLON.Mesh.CreateTube("tube", puntos, 0.0003, 4, null, 0, scene, false, null);
+            //var tube = BABYLON.Mesh.CreateTube("tube", [t1.absolutePosition,t2.absolutePosition], 0.0003, 4, null, 0, this._scene);          
+            BABYLON.Mesh.CreateTube("tube", [t1.absolutePosition, t2.absolutePosition], 0.0003, 4, null, 0, this._scene);
+            //BABYLON.Mesh.CreateLines("lines",[t1.absolutePosition,t2.absolutePosition],this._scene,true) ;
+            var line3d = this._scene.getMeshByName("tube");
+            var lineMat = new BABYLON.StandardMaterial("lineT", this._scene);
+            line3d.material = lineMat;
+            lineMat.diffuseTexture = new BABYLON.Texture("./assets/gumT.jpg", this._scene);
+        }
+        if (evt.keyCode == 65) {
+            console.log("Key A pressed...");
+            //var postProcess = new BABYLON.FxaaPostProcess("fxaa", 2.0, this._camera);
+            var t1 = this._scene.getMeshByName("TAD_01");
+            var t2 = this._scene.getMeshByName('TAD_01 (1)');
+            t1.position = new BABYLON.Vector3(t1.position.x, t1.position.y, t1.position.z + 0.05);
+            t2.position = new BABYLON.Vector3(t2.position.x, t2.position.y, t2.position.z + 0.05);
+        }
+        if (evt.keyCode == 68) {
+            console.log("Key D pressed...");
+            //this.ShowcameraPosition();
+            this.PickedElement();
+        }
+        if (evt.keyCode == 76) {
+            console.log("Key L pressed...");
+            this.LoadObject();
+        }
+        if (evt.keyCode == 82) {
+            this._rootObject = this._scene.getMeshByName("CenterPoint");
+            this._spinOn = !this._spinOn;
+        }
+        _super.prototype.InputController.call(this, evt);
+    };
+    Game.prototype.PickedElement = function () {
+        var onPickAction = new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, function (guy) {
+            console.log("@@@ Workiing!! on: " + guy.meshUnderPointer.name);
+        });
+        var t1 = this._scene.getMeshByName("TAD_01");
+        t1.actionManager = new BABYLON.ActionManager(this._scene);
+        t1.actionManager.registerAction(onPickAction);
+    };
+    Game.prototype.CreateO4DEvents = function () {
+        this._event = new CustomEvent('update');
+        window.addEventListener('update', function (e) {
+            console.log("++++++ Update Event triggered +++++++");
+        }, false);
+    };
+    Game.prototype.LoadObject = function () {
+        console.log("Add object!!!");
+        var ky = new O4D.LoadOrthoModel();
+        ky.LoadObject(this._scene);
+    };
+    Game.prototype.ShowcameraPosition = function () {
+        this._camera.setPosition(new BABYLON.Vector3(this._camera.position.x, this._camera.position.y, this._camera.position.z + 0.05));
+        console.log("Camera pos: " + this._camera.position);
+    };
+    Game.prototype.SubscribeToEvent = function () {
+        // window.dispatchEvent(this._event);
+    };
+    Game.prototype.ToggleScreenInfo = function () {
+        console.log("!: " + this._infoOn);
+        if (this._infoOn) {
+            this._scene.debugLayer.hide();
+            this._infoOn = false;
+        }
+        else {
+            this._scene.debugLayer.show();
+            this._infoOn = true;
+        }
+    };
+    Game.prototype.AddUI = function () {
+        this._superGUI = new O4D.OrthoUI();
+        this._superGUI.InitUI();
+        this._superGUI.BuildUI();
+    };
+    return Game;
+}(O4D.InputController));
+window.addEventListener('DOMContentLoaded', function () {
+    // Create the game using the 'renderCanvas'
+    var game = new Game('renderCanvas');
+    // Create the scene
+    game.createScene();
+    // start animation
+    game.animate();
+    game.setBK();
+    game.InputListener();
+    game.CreateO4DEvents();
+    game.SubscribeToEvent();
+    game.renderPipeline();
+    game.AddUI();
+});
